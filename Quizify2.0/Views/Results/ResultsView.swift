@@ -1767,6 +1767,1646 @@
 
 
 
+//import SwiftUI
+//
+//// The ResultsView shows a detailed breakdown of the user's test scores.
+//// It uses a custom tabbed interface to filter results and a new card-based
+//// layout for a more professional and modern feel, consistent with the rest
+//// of the Quizify app.
+//struct ResultsView: View {
+//    // The ViewModel provides the test result data.
+//    @StateObject private var viewModel = ResultsViewModel()
+//    // State to manage the currently selected tab.
+//    @State private var selectedTab: ResultTab = .recent
+//
+//    var body: some View {
+//        ScrollView {
+//            VStack(alignment: .leading, spacing: 30) {
+//                // MARK: - Header
+//                VStack(alignment: .leading) {
+//                    Text("My Results")
+//                        .font(.system(size: 28, weight: .bold))
+//                    Text("View your test results and performance analytics.")
+//                        .font(.title3)
+//                        .foregroundColor(.quizifyTextGray)
+//                }
+//
+//                // MARK: - Performance Summary Metrics
+//                // A new grid of five dynamically populated stat cards for a more balanced layout.
+//                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 25), count: 5), spacing: 25) {
+//                    StatCardView(
+//                        title: "Average Score",
+//                        value: "\(viewModel.averageScore)%",
+//                        description: "Overall performance",
+//                        icon: "chart.bar.xaxis",
+//                        trend: "All-time average",
+//                        color: .quizifyAccentGreen
+//                    )
+//                    StatCardView(
+//                        title: "Best Score",
+//                        value: "\(viewModel.bestScore)%",
+//                        description: "Highest score achieved",
+//                        icon: "trophy.fill",
+//                        trend: viewModel.bestScoreSubject,
+//                        color: .quizifyAccentBlue
+//                    )
+//                    StatCardView(
+//                        title: "Tests Taken",
+//                        value: "\(viewModel.totalTests)",
+//                        description: "Total number of tests",
+//                        icon: "pencil.and.ruler.fill",
+//                        trend: "Total to date",
+//                        color: .quizifyPrimary
+//                    )
+//                    StatCardView(
+//                        title: "Tests Passed",
+//                        value: "\(viewModel.testsPassed)",
+//                        description: "Tests with a score > 70%",
+//                        icon: "checkmark.circle.fill",
+//                        trend: "Good job!",
+//                        color: .quizifyAccentGreen
+//                    )
+//                    StatCardView(
+//                        title: "Pass Rate",
+//                        value: "\(viewModel.passRate)%",
+//                        description: "Percentage of tests passed",
+//                        icon: "list.bullet.clipboard.fill",
+//                        trend: "Keep the momentum",
+//                        color: .quizifyAccentYellow
+//                    )
+//                }
+//
+//                // MARK: - Filter Tabs
+//                // Custom tab view implementation to match the style of TestsView.
+//                HStack {
+//                    Spacer()
+//                    HStack(spacing: 0) {
+//                        ForEach(ResultTab.allCases) { tab in
+//                            ResultTabButton(tab: tab, selectedTab: $selectedTab)
+//                        }
+//                    }
+//                    .background(Color.quizifyPrimary.opacity(0.1))
+//                    .cornerRadius(8)
+//                    .frame(maxWidth: 600)
+//                    Spacer()
+//                }
+//
+//                // MARK: - Results List
+//                // The list of result cards, filtered by the selected tab.
+//                VStack(spacing: 20) {
+//                    let results = currentResults()
+//                    if results.isEmpty {
+//                        Text("No results to display in this category.")
+//                            .foregroundColor(.gray)
+//                            .font(.headline)
+//                            .frame(maxWidth: .infinity, minHeight: 200)
+//                    } else {
+//                        ForEach(results) { result in
+//                            ResultCardView(result: result)
+//                        }
+//                    }
+//                }
+//            }
+//            .padding(30)
+//        }
+//    }
+//
+//    // Helper function to return the correct data based on the selected tab.
+//    private func currentResults() -> [TestResult] {
+//        switch selectedTab {
+//        case .recent:
+//            return viewModel.recentResults
+//        case .best:
+//            return viewModel.bestResults
+//        case .all:
+//            return viewModel.allResults
+//        }
+//    }
+//}
+//
+//// MARK: - ResultTabButton
+//// A dedicated view for the custom tab buttons.
+//struct ResultTabButton: View {
+//    let tab: ResultTab
+//    @Binding var selectedTab: ResultTab
+//
+//    var body: some View {
+//        Button(action: {
+//            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+//                selectedTab = tab
+//            }
+//        }) {
+//            Text(tab.rawValue)
+//                .font(.headline)
+//                .fontWeight(.semibold)
+//                .padding(.vertical, 12)
+//                .frame(maxWidth: .infinity)
+//                .background(
+//                    ZStack {
+//                        if selectedTab == tab {
+//                            RoundedRectangle(cornerRadius: 8)
+//                                .fill(tab.activeColor)
+//                                .shadow(radius: 3, y: 2)
+//                        }
+//                    }
+//                )
+//                .foregroundColor(selectedTab == tab ? .white : .primary)
+//        }
+//        .buttonStyle(PlainButtonStyle())
+//    }
+//}
+//
+//// Enum to define the filter tabs for the results.
+//enum ResultTab: String, CaseIterable, Identifiable {
+//    case recent = "Recent"
+//    case best = "Best Scores"
+//    case all = "All Results"
+//    var id: String { self.rawValue }
+//
+//    var activeColor: Color {
+//        switch self {
+//        case .recent: return .quizifyPrimary
+//        case .best: return .quizifyAccentBlue
+//        case .all: return .quizifyAccentGreen
+//        }
+//    }
+//}
+//
+//// MARK: - ResultCardView
+//// A card for displaying the details of a single test result.
+//struct ResultCardView: View {
+//    let result: TestResult
+//
+//    // Determines the color based on the score for visual feedback.
+//    private var scoreColor: Color {
+//        if result.score >= 90 { return .quizifyAccentGreen }
+//        if result.score >= 80 { return .quizifyAccentBlue }
+//        if result.score >= 70 { return .quizifyAccentYellow }
+//        return .quizifyRedError
+//    }
+//
+//    var body: some View {
+//        HStack(alignment: .top, spacing: 25) {
+//            // MARK: Score Section
+//            // This section is now a fixed-width container to prevent stretching.
+//            VStack(spacing: 5) {
+//                ZStack {
+//                    Circle()
+//                        .stroke(lineWidth: 10.0)
+//                        .opacity(0.1)
+//                        .foregroundColor(scoreColor)
+//
+//                    Circle()
+//                        .trim(from: 0.0, to: CGFloat(result.score) / 100.0)
+//                        .stroke(style: StrokeStyle(lineWidth: 10.0, lineCap: .round, lineJoin: .round))
+//                        .foregroundColor(scoreColor)
+//                        .rotationEffect(Angle(degrees: 270.0))
+//                        .animation(.linear(duration: 1.0), value: result.score)
+//
+//                    Text("\(result.score)%")
+//                        .font(.system(size: 32, weight: .bold))
+//                        .foregroundColor(scoreColor)
+//                }
+//                .frame(width: 100, height: 100)
+//
+//                Text("Your Score")
+//                    .font(.caption)
+//                    .fontWeight(.semibold)
+//                    .foregroundColor(.quizifyTextGray)
+//            }
+//            .frame(width: 120) // Fixed width for consistent layout
+//
+//            // A vertical divider to visually separate the score from the metrics.
+//            Divider()
+//                .frame(height: 120)
+//
+//            // MARK: Metrics and Footer Section
+//            VStack(alignment: .leading, spacing: 20) {
+//                // Main Test Title and Subject
+//                VStack(alignment: .leading, spacing: 5) {
+//                    Text(result.title)
+//                        .font(.title2)
+//                        .fontWeight(.bold)
+//                    Text(result.subject)
+//                        .font(.headline)
+//                        .foregroundColor(.gray)
+//                }
+//                .frame(maxWidth: .infinity, alignment: .leading)
+//
+//                Divider()
+//
+//                // Key Metrics
+//                // This section uses a cross-divider layout similar to the TestsView for a clean, organized look.
+//                HStack {
+//                    ZStack {
+//                        Rectangle().fill(Color.gray.opacity(0.15)).frame(width: 1)
+//                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 1)
+//
+//                        VStack(spacing: 15) {
+//                            HStack(spacing: 20) {
+//                                ResultSummaryItem(icon: "checkmark.circle.fill", label: "Correct Answers", value: "\(result.correct) / \(result.total)")
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                ResultSummaryItem(icon: "person.2.fill", label: "Class Average", value: "\(result.classAverage)%")
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                            }
+//                            HStack(spacing: 20) {
+//                                ResultSummaryItem(icon: "hourglass", label: "Duration", value: result.duration)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                ResultSummaryItem(icon: "calendar", label: "Date", value: result.date)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                            }
+//                        }
+//                    }
+//                }
+//                .padding()
+//                .background(Color.gray.opacity(0.05))
+//                .cornerRadius(12)
+//
+//                // Footer with Teacher Info and Action Button
+//                HStack {
+//                    // Teacher Info
+//                    HStack(spacing: 10) {
+//                        AsyncImage(url: URL(string: result.teacherAvatar ?? "")) { image in
+//                            image.resizable().clipShape(Circle())
+//                        } placeholder: {
+//                            Image(systemName: "person.crop.circle.fill").resizable()
+//                        }
+//                        .frame(width: 30, height: 30)
+//
+//                        Text(result.teacher)
+//                            .font(.headline)
+//                            .foregroundColor(.quizifyTextGray)
+//                    }
+//
+//                    Spacer()
+//
+//                    // Action Button styled to match the app's theme.
+//                    Button(action: {}) {
+//                        Label("View Details", systemImage: "eye.fill")
+//                            .fontWeight(.semibold)
+//                            .padding(.vertical, 10)
+//                            .frame(minWidth: 150)
+//                    }
+//                    .buttonStyle(OutlineButtonStyle(color: .quizifyPrimary))
+//                }
+//            }
+//        }
+//        .padding(25)
+//        .background(Color.white)
+//        .cornerRadius(20)
+//        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+//    }
+//}
+//
+//// A reusable sub-view to display a key metric within the card.
+//fileprivate struct ResultSummaryItem: View {
+//    let icon: String
+//    let label: String
+//    let value: String
+//
+//    var body: some View {
+//        HStack {
+//            Image(systemName: icon)
+//                .foregroundColor(.quizifyPrimary)
+//                .frame(width: 20)
+//            VStack(alignment: .leading, spacing: 2) {
+//                Text(label)
+//                    .font(.caption)
+//                    .foregroundColor(.quizifyTextGray)
+//                Text(value)
+//                    .font(.headline)
+//                    .fontWeight(.medium)
+//            }
+//        }
+//    }
+//}
+//
+//// MARK: - Preview
+//struct ResultsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ResultsView()
+//            .frame(width: 1400)
+//            .background(Color.quizifyOffWhite)
+//    }
+//}
+
+
+
+
+//import SwiftUI
+//
+//// The ResultsView shows a detailed breakdown of the user's test scores.
+//// It uses a custom tabbed interface to filter results and a new card-based
+//// layout for a more professional and modern feel, consistent with the rest
+//// of the Quizify app.
+//struct ResultsView: View {
+//    // The ViewModel provides the test result data.
+//    @StateObject private var viewModel = ResultsViewModel()
+//    // State to manage the currently selected tab.
+//    @State private var selectedTab: ResultTab = .recent
+//
+//    var body: some View {
+//        ScrollView {
+//            VStack(alignment: .leading, spacing: 30) {
+//                // MARK: - Header
+//                VStack(alignment: .leading) {
+//                    Text("My Results")
+//                        .font(.system(size: 28, weight: .bold))
+//                    Text("View your test results and performance analytics.")
+//                        .font(.title3)
+//                        .foregroundColor(.quizifyTextGray)
+//                }
+//                
+//                // MARK: - Performance Summary Metrics
+//                // A new grid of five dynamically populated stat cards for a more balanced layout.
+//                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 25), count: 5), spacing: 25) {
+//                    StatCardView(
+//                        title: "Average Score",
+//                        value: "\(viewModel.averageScore)%",
+//                        description: "Overall performance",
+//                        icon: "chart.bar.xaxis",
+//                        trend: "All-time average",
+//                        color: .quizifyAccentGreen
+//                    )
+//                    StatCardView(
+//                        title: "Best Score",
+//                        value: "\(viewModel.bestScore)%",
+//                        description: "Highest score achieved",
+//                        icon: "trophy.fill",
+//                        trend: viewModel.bestScoreSubject,
+//                        color: .quizifyAccentBlue
+//                    )
+//                    StatCardView(
+//                        title: "Tests Taken",
+//                        value: "\(viewModel.totalTests)",
+//                        description: "Total number of tests",
+//                        icon: "pencil.and.ruler.fill",
+//                        trend: "Total to date",
+//                        color: .quizifyPrimary
+//                    )
+//                    StatCardView(
+//                        title: "Tests Passed",
+//                        value: "\(viewModel.testsPassed)",
+//                        description: "Tests with a score > 70%",
+//                        icon: "checkmark.circle.fill",
+//                        trend: "Good job!",
+//                        color: .quizifyAccentGreen
+//                    )
+//                    StatCardView(
+//                        title: "Pass Rate",
+//                        value: "\(viewModel.passRate)%",
+//                        description: "Percentage of tests passed",
+//                        icon: "list.bullet.clipboard.fill",
+//                        trend: "Keep the momentum",
+//                        color: .quizifyAccentYellow
+//                    )
+//                }
+//
+//                // MARK: - Filter Tabs
+//                // Custom tab view implementation to match the style of TestsView.
+//                HStack {
+//                    Spacer()
+//                    HStack(spacing: 0) {
+//                        ForEach(ResultTab.allCases) { tab in
+//                            ResultTabButton(tab: tab, selectedTab: $selectedTab)
+//                        }
+//                    }
+//                    .background(Color.quizifyPrimary.opacity(0.1))
+//                    .cornerRadius(8)
+//                    .frame(maxWidth: 600)
+//                    Spacer()
+//                }
+//                
+//                // MARK: - Results List
+//                // The list of result cards, now arranged in a two-column grid for better visual appeal on larger screens.
+//                let results = currentResults()
+//                if results.isEmpty {
+//                    Text("No results to display in this category.")
+//                        .foregroundColor(.gray)
+//                        .font(.headline)
+//                        .frame(maxWidth: .infinity, minHeight: 200)
+//                } else {
+//                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 400), spacing: 20)], spacing: 20) {
+//                        ForEach(results) { result in
+//                            ResultCardView(result: result)
+//                        }
+//                    }
+//                }
+//            }
+//            .padding(30)
+//        }
+//    }
+//    
+//    // Helper function to return the correct data based on the selected tab.
+//    private func currentResults() -> [TestResult] {
+//        switch selectedTab {
+//        case .recent:
+//            return viewModel.recentResults
+//        case .best:
+//            return viewModel.bestResults
+//        case .all:
+//            return viewModel.allResults
+//        }
+//    }
+//}
+//
+//// MARK: - ResultTabButton
+//// A dedicated view for the custom tab buttons.
+//struct ResultTabButton: View {
+//    let tab: ResultTab
+//    @Binding var selectedTab: ResultTab
+//    
+//    var body: some View {
+//        Button(action: {
+//            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+//                selectedTab = tab
+//            }
+//        }) {
+//            Text(tab.rawValue)
+//                .font(.headline)
+//                .fontWeight(.semibold)
+//                .padding(.vertical, 12)
+//                .frame(maxWidth: .infinity)
+//                .background(
+//                    ZStack {
+//                        if selectedTab == tab {
+//                            RoundedRectangle(cornerRadius: 8)
+//                                .fill(tab.activeColor)
+//                                .shadow(radius: 3, y: 2)
+//                        }
+//                    }
+//                )
+//                .foregroundColor(selectedTab == tab ? .white : .primary)
+//        }
+//        .buttonStyle(PlainButtonStyle())
+//    }
+//}
+//
+//// Enum to define the filter tabs for the results.
+//enum ResultTab: String, CaseIterable, Identifiable {
+//    case recent = "Recent"
+//    case best = "Best Scores"
+//    case all = "All Results"
+//    var id: String { self.rawValue }
+//    
+//    var activeColor: Color {
+//        switch self {
+//        case .recent: return .quizifyPrimary
+//        case .best: return .quizifyAccentBlue
+//        case .all: return .quizifyAccentGreen
+//        }
+//    }
+//}
+//
+//// MARK: - ResultCardView
+//// A card for displaying the details of a single test result.
+//struct ResultCardView: View {
+//    let result: TestResult
+//    
+//    // Determines the color based on the score for visual feedback.
+//    private var scoreColor: Color {
+//        if result.score >= 90 { return .quizifyAccentGreen }
+//        if result.score >= 80 { return .quizifyAccentBlue }
+//        if result.score >= 70 { return .quizifyAccentYellow }
+//        return .quizifyRedError
+//    }
+//
+//    var body: some View {
+//        HStack(alignment: .top, spacing: 25) {
+//            // MARK: Score Section
+//            VStack(spacing: 5) {
+//                Spacer() // Pushes the content to the center
+//                ZStack {
+//                    Circle()
+//                        .stroke(lineWidth: 10.0)
+//                        .opacity(0.1)
+//                        .foregroundColor(scoreColor)
+//                    
+//                    Circle()
+//                        .trim(from: 0.0, to: CGFloat(result.score) / 100.0)
+//                        .stroke(style: StrokeStyle(lineWidth: 10.0, lineCap: .round, lineJoin: .round))
+//                        .foregroundColor(scoreColor)
+//                        .rotationEffect(Angle(degrees: 270.0))
+//                        .animation(.linear(duration: 1.0), value: result.score)
+//
+//                    Text("\(result.score)%")
+//                        .font(.system(size: 32, weight: .bold))
+//                        .foregroundColor(scoreColor)
+//                }
+//                .frame(width: 100, height: 100)
+//                
+//                Text("Your Score")
+//                    .font(.caption)
+//                    .fontWeight(.semibold)
+//                    .foregroundColor(.quizifyTextGray)
+//                Spacer() // Pushes the content to the center
+//            }
+//            .frame(width: 120) // Fixed width for consistent layout
+//            
+//            Divider()
+//                .frame(height: 120)
+//
+//            // MARK: Metrics and Footer Section
+//            VStack(alignment: .leading, spacing: 20) {
+//                // Main Test Title and Subject
+//                VStack(alignment: .leading, spacing: 5) {
+//                    Text(result.title)
+//                        .font(.title2)
+//                        .fontWeight(.bold)
+//                    Text(result.subject)
+//                        .font(.headline)
+//                        .foregroundColor(.gray)
+//                }
+//                .frame(maxWidth: .infinity, alignment: .leading)
+//                
+//                Divider()
+//
+//                // Key Metrics - A new, clean grid layout with a cross divider.
+//                HStack {
+//                    ZStack {
+//                        Rectangle().fill(Color.gray.opacity(0.15)).frame(width: 1)
+//                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 1)
+//
+//                        VStack(spacing: 15) {
+//                            HStack(spacing: 20) {
+//                                ResultSummaryItem(icon: "checkmark.circle.fill", label: "Correct Answers", value: "\(result.correct) / \(result.total)")
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                ResultSummaryItem(icon: "person.2.fill", label: "Class Average", value: "\(result.classAverage)%")
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                            }
+//                            HStack(spacing: 20) {
+//                                ResultSummaryItem(icon: "hourglass", label: "Duration", value: result.duration)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                ResultSummaryItem(icon: "calendar", label: "Date", value: result.date)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                            }
+//                        }
+//                    }
+//                }
+//                .padding()
+//                .background(Color.gray.opacity(0.05))
+//                .cornerRadius(12)
+//                
+//                // Footer with Teacher Info and Action Button
+//                HStack {
+//                    // Teacher Info
+//                    HStack(spacing: 10) {
+//                        AsyncImage(url: URL(string: result.teacherAvatar ?? "")) { image in
+//                            image.resizable().clipShape(Circle())
+//                        } placeholder: {
+//                            Image(systemName: "person.crop.circle.fill").resizable()
+//                        }
+//                        .frame(width: 30, height: 30)
+//                        
+//                        Text(result.teacher)
+//                            .font(.headline)
+//                            .foregroundColor(.quizifyTextGray)
+//                    }
+//                    
+//                    Spacer()
+//                    
+//                    // Action Button styled to match the app's theme.
+//                    Button(action: {}) {
+//                        Label("View Details", systemImage: "eye.fill")
+//                            .fontWeight(.semibold)
+//                            .padding(.vertical, 10)
+//                            .frame(minWidth: 150)
+//                    }
+//                    .buttonStyle(OutlineButtonStyle(color: .quizifyPrimary))
+//                }
+//            }
+//        }
+//        .padding(25)
+//        .background(Color.white)
+//        .cornerRadius(20)
+//        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+//    }
+//}
+//
+//// A reusable sub-view to display a key metric within the card.
+//fileprivate struct ResultSummaryItem: View {
+//    let icon: String
+//    let label: String
+//    let value: String
+//    
+//    var body: some View {
+//        HStack {
+//            Image(systemName: icon)
+//                .foregroundColor(.quizifyPrimary)
+//                .frame(width: 20)
+//            VStack(alignment: .leading, spacing: 2) {
+//                Text(label)
+//                    .font(.caption)
+//                    .foregroundColor(.quizifyTextGray)
+//                Text(value)
+//                    .font(.headline)
+//                    .fontWeight(.medium)
+//            }
+//        }
+//    }
+//}
+//
+//// MARK: - Preview
+//struct ResultsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ResultsView()
+//            .frame(width: 1400)
+//            .background(Color.quizifyOffWhite)
+//    }
+//}
+
+
+
+
+
+
+
+
+//import SwiftUI
+//
+//// The ResultsView shows a detailed breakdown of the user's test scores.
+//// It uses a custom tabbed interface to filter results and a new card-based
+//// layout for a more professional and modern feel, consistent with the rest
+//// of the Quizify app.
+//struct ResultsView: View {
+//    // The ViewModel provides the test result data.
+//    @StateObject private var viewModel = ResultsViewModel()
+//    // State to manage the currently selected tab.
+//    @State private var selectedTab: ResultTab = .recent
+//
+//    var body: some View {
+//        ScrollView {
+//            VStack(alignment: .leading, spacing: 30) {
+//                // MARK: - Header
+//                VStack(alignment: .leading) {
+//                    Text("My Results")
+//                        .font(.system(size: 28, weight: .bold))
+//                    Text("View your test results and performance analytics.")
+//                        .font(.title3)
+//                        .foregroundColor(.quizifyTextGray)
+//                }
+//                
+//                // MARK: - Performance Summary Metrics
+//                // A new grid of five dynamically populated stat cards for a more balanced layout.
+//                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 25), count: 5), spacing: 25) {
+//                    StatCardView(
+//                        title: "Average Score",
+//                        value: "\(viewModel.averageScore)%",
+//                        description: "Overall performance",
+//                        icon: "chart.bar.xaxis",
+//                        trend: "All-time average",
+//                        color: .quizifyAccentGreen
+//                    )
+//                    StatCardView(
+//                        title: "Best Score",
+//                        value: "\(viewModel.bestScore)%",
+//                        description: "Highest score achieved",
+//                        icon: "trophy.fill",
+//                        trend: viewModel.bestScoreSubject,
+//                        color: .quizifyAccentBlue
+//                    )
+//                    StatCardView(
+//                        title: "Tests Taken",
+//                        value: "\(viewModel.totalTests)",
+//                        description: "Total number of tests",
+//                        icon: "pencil.and.ruler.fill",
+//                        trend: "Total to date",
+//                        color: .quizifyPrimary
+//                    )
+//                    StatCardView(
+//                        title: "Tests Passed",
+//                        value: "\(viewModel.testsPassed)",
+//                        description: "Tests with a score > 70%",
+//                        icon: "checkmark.circle.fill",
+//                        trend: "Good job!",
+//                        color: .quizifyAccentGreen
+//                    )
+//                    StatCardView(
+//                        title: "Pass Rate",
+//                        value: "\(viewModel.passRate)%",
+//                        description: "Percentage of tests passed",
+//                        icon: "list.bullet.clipboard.fill",
+//                        trend: "Keep the momentum",
+//                        color: .quizifyAccentYellow
+//                    )
+//                }
+//
+//                // MARK: - Filter Tabs
+//                // Custom tab view implementation to match the style of TestsView.
+//                HStack {
+//                    Spacer()
+//                    HStack(spacing: 0) {
+//                        ForEach(ResultTab.allCases) { tab in
+//                            ResultTabButton(tab: tab, selectedTab: $selectedTab)
+//                        }
+//                    }
+//                    .background(Color.quizifyPrimary.opacity(0.1))
+//                    .cornerRadius(8)
+//                    .frame(maxWidth: 600)
+//                    Spacer()
+//                }
+//                
+//                // MARK: - Results List
+//                // The list of result cards, now arranged in a two-column grid for better visual appeal on larger screens.
+//                let results = currentResults()
+//                if results.isEmpty {
+//                    Text("No results to display in this category.")
+//                        .foregroundColor(.gray)
+//                        .font(.headline)
+//                        .frame(maxWidth: .infinity, minHeight: 200)
+//                } else {
+//                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)], spacing: 20) {
+//                        ForEach(results) { result in
+//                            ResultCardView(result: result)
+//                        }
+//                    }
+//                }
+//            }
+//            .padding(30)
+//        }
+//    }
+//    
+//    // Helper function to return the correct data based on the selected tab.
+//    private func currentResults() -> [TestResult] {
+//        switch selectedTab {
+//        case .recent:
+//            return viewModel.recentResults
+//        case .best:
+//            return viewModel.bestResults
+//        case .all:
+//            return viewModel.allResults
+//        }
+//    }
+//}
+//
+//// MARK: - ResultTabButton
+//// A dedicated view for the custom tab buttons.
+//struct ResultTabButton: View {
+//    let tab: ResultTab
+//    @Binding var selectedTab: ResultTab
+//    
+//    var body: some View {
+//        Button(action: {
+//            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+//                selectedTab = tab
+//            }
+//        }) {
+//            Text(tab.rawValue)
+//                .font(.headline)
+//                .fontWeight(.semibold)
+//                .padding(.vertical, 12)
+//                .frame(maxWidth: .infinity)
+//                .background(
+//                    ZStack {
+//                        if selectedTab == tab {
+//                            RoundedRectangle(cornerRadius: 8)
+//                                .fill(tab.activeColor)
+//                                .shadow(radius: 3, y: 2)
+//                        }
+//                    }
+//                )
+//                .foregroundColor(selectedTab == tab ? .white : .primary)
+//        }
+//        .buttonStyle(PlainButtonStyle())
+//    }
+//}
+//
+//// Enum to define the filter tabs for the results.
+//enum ResultTab: String, CaseIterable, Identifiable {
+//    case recent = "Recent"
+//    case best = "Best Scores"
+//    case all = "All Results"
+//    var id: String { self.rawValue }
+//    
+//    var activeColor: Color {
+//        switch self {
+//        case .recent: return .quizifyPrimary
+//        case .best: return .quizifyAccentBlue
+//        case .all: return .quizifyAccentGreen
+//        }
+//    }
+//}
+//
+//// MARK: - ResultCardView
+//// A card for displaying the details of a single test result.
+//struct ResultCardView: View {
+//    let result: TestResult
+//    
+//    // Determines the color based on the score for visual feedback.
+//    private var scoreColor: Color {
+//        if result.score >= 90 { return .quizifyAccentGreen }
+//        if result.score >= 80 { return .quizifyAccentBlue }
+//        if result.score >= 70 { return .quizifyAccentYellow }
+//        return .quizifyRedError
+//    }
+//
+//    var body: some View {
+//        HStack(alignment: .top, spacing: 25) {
+//            // MARK: Score Section
+//            VStack(spacing: 5) {
+//                Spacer() // Pushes the content to the center
+//                ZStack {
+//                    Circle()
+//                        .stroke(lineWidth: 10.0)
+//                        .opacity(0.1)
+//                        .foregroundColor(scoreColor)
+//                    
+//                    Circle()
+//                        .trim(from: 0.0, to: CGFloat(result.score) / 100.0)
+//                        .stroke(style: StrokeStyle(lineWidth: 10.0, lineCap: .round, lineJoin: .round))
+//                        .foregroundColor(scoreColor)
+//                        .rotationEffect(Angle(degrees: 270.0))
+//                        .animation(.linear(duration: 1.0), value: result.score)
+//
+//                    Text("\(result.score)%")
+//                        .font(.system(size: 32, weight: .bold))
+//                        .foregroundColor(scoreColor)
+//                }
+//                .frame(width: 100, height: 100)
+//                
+//                Text("Your Score")
+//                    .font(.caption)
+//                    .fontWeight(.semibold)
+//                    .foregroundColor(.quizifyTextGray)
+//                Spacer() // Pushes the content to the center
+//            }
+//            .frame(width: 120) // Fixed width for consistent layout
+//            
+//            Divider()
+//                .frame(height: 120)
+//
+//            // MARK: Metrics and Footer Section
+//            VStack(alignment: .leading, spacing: 20) {
+//                // Main Test Title and Subject
+//                VStack(alignment: .leading, spacing: 5) {
+//                    Text(result.title)
+//                        .font(.title2)
+//                        .fontWeight(.bold)
+//                    Text(result.subject)
+//                        .font(.headline)
+//                        .foregroundColor(.gray)
+//                }
+//                .frame(maxWidth: .infinity, alignment: .leading)
+//                
+//                Divider()
+//
+//                // Key Metrics - A new, clean grid layout with a cross divider.
+//                HStack {
+//                    ZStack {
+//                        Rectangle().fill(Color.gray.opacity(0.15)).frame(width: 1)
+//                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 1)
+//
+//                        VStack(spacing: 15) {
+//                            HStack(spacing: 20) {
+//                                ResultSummaryItem(icon: "checkmark.circle.fill", label: "Correct Answers", value: "\(result.correct) / \(result.total)")
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                ResultSummaryItem(icon: "person.2.fill", label: "Class Average", value: "\(result.classAverage)%")
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                            }
+//                            HStack(spacing: 20) {
+//                                ResultSummaryItem(icon: "hourglass", label: "Duration", value: result.duration)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                ResultSummaryItem(icon: "calendar", label: "Date", value: result.date)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                            }
+//                        }
+//                    }
+//                }
+//                .padding()
+//                .background(Color.gray.opacity(0.05))
+//                .cornerRadius(12)
+//                
+//                // Footer with Teacher Info and Action Button
+//                HStack {
+//                    // Teacher Info
+//                    HStack(spacing: 10) {
+//                        AsyncImage(url: URL(string: result.teacherAvatar ?? "")) { image in
+//                            image.resizable().clipShape(Circle())
+//                        } placeholder: {
+//                            Image(systemName: "person.crop.circle.fill").resizable()
+//                        }
+//                        .frame(width: 30, height: 30)
+//                        
+//                        Text(result.teacher)
+//                            .font(.headline)
+//                            .foregroundColor(.quizifyTextGray)
+//                    }
+//                    
+//                    Spacer()
+//                    
+//                    // Action Button styled to match the app's theme.
+//                    Button(action: {}) {
+//                        Label("View Details", systemImage: "eye.fill")
+//                            .fontWeight(.semibold)
+//                            .padding(.vertical, 10)
+//                            .frame(minWidth: 150)
+//                    }
+//                    .buttonStyle(OutlineButtonStyle(color: .quizifyPrimary))
+//                }
+//            }
+//        }
+//        .padding(25)
+//        .background(Color.white)
+//        .cornerRadius(20)
+//        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+//    }
+//}
+//
+//// A reusable sub-view to display a key metric within the card.
+//fileprivate struct ResultSummaryItem: View {
+//    let icon: String
+//    let label: String
+//    let value: String
+//    
+//    var body: some View {
+//        HStack {
+//            Image(systemName: icon)
+//                .foregroundColor(.quizifyPrimary)
+//                .frame(width: 20)
+//            VStack(alignment: .leading, spacing: 2) {
+//                Text(label)
+//                    .font(.caption)
+//                    .foregroundColor(.quizifyTextGray)
+//                Text(value)
+//                    .font(.headline)
+//                    .fontWeight(.medium)
+//            }
+//        }
+//    }
+//}
+//
+//// MARK: - Preview
+//struct ResultsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ResultsView()
+//            .frame(width: 1400)
+//            .background(Color.quizifyOffWhite)
+//    }
+//}
+
+
+
+
+
+
+
+//import SwiftUI
+//
+//// The ResultsView shows a detailed breakdown of the user's test scores.
+//// It uses a custom tabbed interface to filter results and a new card-based
+//// layout for a more professional and modern feel, consistent with the rest
+//// of the Quizify app.
+//struct ResultsView: View {
+//    // The ViewModel provides the test result data.
+//    @StateObject private var viewModel = ResultsViewModel()
+//    // State to manage the currently selected tab.
+//    @State private var selectedTab: ResultTab = .recent
+//
+//    var body: some View {
+//        ScrollView {
+//            VStack(alignment: .leading, spacing: 30) {
+//                // MARK: - Header
+//                VStack(alignment: .leading) {
+//                    Text("My Results")
+//                        .font(.system(size: 28, weight: .bold))
+//                    Text("View your test results and performance analytics.")
+//                        .font(.title3)
+//                        .foregroundColor(.quizifyTextGray)
+//                }
+//
+//                // MARK: - Performance Summary Metrics
+//                // A new grid of five dynamically populated stat cards for a more balanced layout.
+//                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 25), count: 5), spacing: 25) {
+//                    StatCardView(
+//                        title: "Average Score",
+//                        value: "\(viewModel.averageScore)%",
+//                        description: "Overall performance",
+//                        icon: "chart.bar.xaxis",
+//                        trend: "All-time average",
+//                        color: .quizifyAccentGreen
+//                    )
+//                    StatCardView(
+//                        title: "Best Score",
+//                        value: "\(viewModel.bestScore)%",
+//                        description: "Highest score achieved",
+//                        icon: "trophy.fill",
+//                        trend: viewModel.bestScoreSubject,
+//                        color: .quizifyAccentBlue
+//                    )
+//                    StatCardView(
+//                        title: "Tests Taken",
+//                        value: "\(viewModel.totalTests)",
+//                        description: "Total number of tests",
+//                        icon: "pencil.and.ruler.fill",
+//                        trend: "Total to date",
+//                        color: .quizifyPrimary
+//                    )
+//                    StatCardView(
+//                        title: "Tests Passed",
+//                        value: "\(viewModel.testsPassed)",
+//                        description: "Tests with a score > 70%",
+//                        icon: "checkmark.circle.fill",
+//                        trend: "Good job!",
+//                        color: .quizifyAccentGreen
+//                    )
+//                    StatCardView(
+//                        title: "Pass Rate",
+//                        value: "\(viewModel.passRate)%",
+//                        description: "Percentage of tests passed",
+//                        icon: "list.bullet.clipboard.fill",
+//                        trend: "Keep the momentum",
+//                        color: .quizifyAccentYellow
+//                    )
+//                }
+//
+//                // MARK: - Filter Tabs
+//                // Custom tab view implementation to match the style of TestsView.
+//                HStack {
+//                    Spacer()
+//                    HStack(spacing: 0) {
+//                        ForEach(ResultTab.allCases) { tab in
+//                            ResultTabButton(tab: tab, selectedTab: $selectedTab)
+//                        }
+//                    }
+//                    .background(Color.quizifyPrimary.opacity(0.1))
+//                    .cornerRadius(8)
+//                    .frame(maxWidth: 600)
+//                    Spacer()
+//                }
+//
+//                // MARK: - Results List
+//                // The list of result cards, now arranged in a two-column grid for better visual appeal on larger screens.
+//                let results = currentResults()
+//                if results.isEmpty {
+//                    Text("No results to display in this category.")
+//                        .foregroundColor(.gray)
+//                        .font(.headline)
+//                        .frame(maxWidth: .infinity, minHeight: 200)
+//                } else {
+//                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)], spacing: 20) {
+//                        ForEach(results) { result in
+//                            ResultCardView(result: result)
+//                        }
+//                    }
+//                }
+//            }
+//            .padding(30)
+//        }
+//    }
+//
+//    // Helper function to return the correct data based on the selected tab.
+//    private func currentResults() -> [TestResult] {
+//        switch selectedTab {
+//        case .recent:
+//            return viewModel.recentResults
+//        case .best:
+//            return viewModel.bestResults
+//        case .all:
+//            return viewModel.allResults
+//        }
+//    }
+//}
+//
+//// MARK: - ResultTabButton
+//// A dedicated view for the custom tab buttons.
+//struct ResultTabButton: View {
+//    let tab: ResultTab
+//    @Binding var selectedTab: ResultTab
+//
+//    var body: some View {
+//        Button(action: {
+//            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+//                selectedTab = tab
+//            }
+//        }) {
+//            Text(tab.rawValue)
+//                .font(.headline)
+//                .fontWeight(.semibold)
+//                .padding(.vertical, 12)
+//                .frame(maxWidth: .infinity)
+//                .background(
+//                    ZStack {
+//                        if selectedTab == tab {
+//                            RoundedRectangle(cornerRadius: 8)
+//                                .fill(tab.activeColor)
+//                                .shadow(radius: 3, y: 2)
+//                        }
+//                    }
+//                )
+//                .foregroundColor(selectedTab == tab ? .white : .primary)
+//        }
+//        .buttonStyle(PlainButtonStyle())
+//    }
+//}
+//
+//// Enum to define the filter tabs for the results.
+//enum ResultTab: String, CaseIterable, Identifiable {
+//    case recent = "Recent"
+//    case best = "Best Scores"
+//    case all = "All Results"
+//    var id: String { self.rawValue }
+//
+//    var activeColor: Color {
+//        switch self {
+//        case .recent: return .quizifyPrimary
+//        case .best: return .quizifyAccentBlue
+//        case .all: return .quizifyAccentGreen
+//        }
+//    }
+//}
+//
+//// MARK: - ResultCardView
+//// A card for displaying the details of a single test result.
+//struct ResultCardView: View {
+//    let result: TestResult
+//
+//    // Determines the color based on the score for visual feedback.
+//    private var scoreColor: Color {
+//        if result.score >= 90 { return .quizifyAccentGreen }
+//        if result.score >= 80 { return .quizifyAccentBlue }
+//        if result.score >= 70 { return .quizifyAccentYellow }
+//        return .quizifyRedError
+//    }
+//
+//    var body: some View {
+//        HStack(alignment: .top, spacing: 25) {
+//            // MARK: Score Section
+//            VStack(spacing: 5) {
+//                Spacer() // Pushes the content to the center
+//                ZStack {
+//                    Circle()
+//                        .stroke(lineWidth: 10.0)
+//                        .opacity(0.1)
+//                        .foregroundColor(scoreColor)
+//
+//                    Circle()
+//                        .trim(from: 0.0, to: CGFloat(result.score) / 100.0)
+//                        .stroke(style: StrokeStyle(lineWidth: 10.0, lineCap: .round, lineJoin: .round))
+//                        .foregroundColor(scoreColor)
+//                        .rotationEffect(Angle(degrees: 270.0))
+//                        .animation(.linear(duration: 1.0), value: result.score)
+//
+//                    Text("\(result.score)%")
+//                        .font(.system(size: 32, weight: .bold))
+//                        .foregroundColor(scoreColor)
+//                }
+//                .frame(width: 100, height: 100)
+//
+//                Text("Your Score")
+//                    .font(.caption)
+//                    .fontWeight(.semibold)
+//                    .foregroundColor(.quizifyTextGray)
+//                    .padding(.top, 10) // Added spacing here
+//                Spacer() // Pushes the content to the center
+//            }
+//            .frame(width: 120) // Fixed width for consistent layout
+//
+//            Divider()
+//                .frame(height: 120)
+//
+//            // MARK: Metrics and Footer Section
+//            VStack(alignment: .leading, spacing: 20) {
+//                // Main Test Title and Subject
+//                VStack(alignment: .leading, spacing: 5) {
+//                    Text(result.title)
+//                        .font(.title2)
+//                        .fontWeight(.bold)
+//                    Text(result.subject)
+//                        .font(.headline)
+//                        .foregroundColor(.gray)
+//                }
+//                .frame(maxWidth: .infinity, alignment: .leading)
+//
+//                Divider()
+//
+//                // Key Metrics - A new, clean grid layout with a cross divider.
+//                HStack {
+//                    ZStack {
+//                        Rectangle().fill(Color.gray.opacity(0.15)).frame(width: 1)
+//                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 1)
+//
+//                        VStack(spacing: 15) {
+//                            HStack(spacing: 20) {
+//                                ResultSummaryItem(icon: "checkmark.circle.fill", label: "Correct Answers", value: "\(result.correct) / \(result.total)")
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                ResultSummaryItem(icon: "person.2.fill", label: "Class Average", value: "\(result.classAverage)%")
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                            }
+//                            HStack(spacing: 20) {
+//                                ResultSummaryItem(icon: "hourglass", label: "Duration", value: result.duration)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                ResultSummaryItem(icon: "calendar", label: "Date", value: result.date)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                            }
+//                        }
+//                    }
+//                }
+//                .padding()
+//                .background(Color.gray.opacity(0.05))
+//                .cornerRadius(12)
+//
+//                // Footer with Teacher Info and Action Button
+//                HStack {
+//                    // Teacher Info
+//                    HStack(spacing: 10) {
+//                        AsyncImage(url: URL(string: result.teacherAvatar ?? "")) { image in
+//                            image.resizable().clipShape(Circle())
+//                        } placeholder: {
+//                            Image(systemName: "person.crop.circle.fill").resizable()
+//                        }
+//                        .frame(width: 30, height: 30)
+//
+//                        Text(result.teacher)
+//                            .font(.headline)
+//                            .foregroundColor(.quizifyTextGray)
+//                    }
+//
+//                    Spacer()
+//
+//                    // Action Button styled to match the app's theme.
+//                    Button(action: {}) {
+//                        Label("View Details", systemImage: "eye.fill")
+//                            .fontWeight(.semibold)
+//                            .padding(.vertical, 10)
+//                            .frame(minWidth: 150)
+//                    }
+//                    .buttonStyle(OutlineButtonStyle(color: .quizifyPrimary))
+//                }
+//            }
+//        }
+//        .padding(25)
+//        .background(Color.white)
+//        .cornerRadius(20)
+//        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+//    }
+//}
+//
+//// A reusable sub-view to display a key metric within the card.
+//fileprivate struct ResultSummaryItem: View {
+//    let icon: String
+//    let label: String
+//    let value: String
+//
+//    var body: some View {
+//        HStack(alignment: .top) { // Ensure top alignment
+//            Image(systemName: icon)
+//                .foregroundColor(.quizifyPrimary)
+//                .frame(width: 20)
+//                .padding(.top, 2) // Add padding to push icon down
+//            VStack(alignment: .leading, spacing: 2) {
+//                Text(label)
+//                    .font(.caption)
+//                    .foregroundColor(.quizifyTextGray)
+//                Text(value)
+//                    .font(.headline)
+//                    .fontWeight(.medium)
+//            }
+//        }
+//    }
+//}
+//
+//// MARK: - Preview
+//struct ResultsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ResultsView()
+//            .frame(width: 1400)
+//            .background(Color.quizifyOffWhite)
+//    }
+//}
+
+
+
+
+
+
+
+
+
+//import SwiftUI
+//
+//// The ResultsView shows a detailed breakdown of the user's test scores.
+//// It uses a custom tabbed interface to filter results and a new card-based
+//// layout for a more professional and modern feel, consistent with the rest
+//// of the Quizify app.
+//struct ResultsView: View {
+//    // The ViewModel provides the test result data.
+//    @StateObject private var viewModel = ResultsViewModel()
+//    // State to manage the currently selected tab.
+//    @State private var selectedTab: ResultTab = .recent
+//
+//    var body: some View {
+//        ScrollView {
+//            VStack(alignment: .leading, spacing: 30) {
+//                // MARK: - Header
+//                VStack(alignment: .leading) {
+//                    Text("My Results")
+//                        .font(.system(size: 28, weight: .bold))
+//                    Text("View your test results and performance analytics.")
+//                        .font(.title3)
+//                        .foregroundColor(.quizifyTextGray)
+//                }
+//                
+//                // MARK: - Performance Summary Metrics
+//                // A new grid of five dynamically populated stat cards for a more balanced layout.
+//                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 25), count: 5), spacing: 25) {
+//                    StatCardView(
+//                        title: "Average Score",
+//                        value: "\(viewModel.averageScore)%",
+//                        description: "Overall performance",
+//                        icon: "chart.bar.xaxis",
+//                        trend: "All-time average",
+//                        color: .quizifyAccentGreen
+//                    )
+//                    StatCardView(
+//                        title: "Best Score",
+//                        value: "\(viewModel.bestScore)%",
+//                        description: "Highest score achieved",
+//                        icon: "trophy.fill",
+//                        trend: viewModel.bestScoreSubject,
+//                        color: .quizifyAccentBlue
+//                    )
+//                    StatCardView(
+//                        title: "Tests Taken",
+//                        value: "\(viewModel.totalTests)",
+//                        description: "Total number of tests",
+//                        icon: "pencil.and.ruler.fill",
+//                        trend: "Total to date",
+//                        color: .quizifyPrimary
+//                    )
+//                    StatCardView(
+//                        title: "Tests Passed",
+//                        value: "\(viewModel.testsPassed)",
+//                        description: "Tests with a score > 70%",
+//                        icon: "checkmark.circle.fill",
+//                        trend: "Good job!",
+//                        color: .quizifyAccentGreen
+//                    )
+//                    StatCardView(
+//                        title: "Pass Rate",
+//                        value: "\(viewModel.passRate)%",
+//                        description: "Percentage of tests passed",
+//                        icon: "list.bullet.clipboard.fill",
+//                        trend: "Keep the momentum",
+//                        color: .quizifyAccentYellow
+//                    )
+//                }
+//
+//                // MARK: - Filter Tabs
+//                // Custom tab view implementation to match the style of TestsView.
+//                HStack {
+//                    Spacer()
+//                    HStack(spacing: 0) {
+//                        ForEach(ResultTab.allCases) { tab in
+//                            ResultTabButton(tab: tab, selectedTab: $selectedTab)
+//                        }
+//                    }
+//                    .background(Color.quizifyPrimary.opacity(0.1))
+//                    .cornerRadius(8)
+//                    .frame(maxWidth: 600)
+//                    Spacer()
+//                }
+//                
+//                // MARK: - Results List
+//                // The list of result cards, now arranged in a two-column grid for better visual appeal on larger screens.
+//                let results = currentResults()
+//                if results.isEmpty {
+//                    Text("No results to display in this category.")
+//                        .foregroundColor(.gray)
+//                        .font(.headline)
+//                        .frame(maxWidth: .infinity, minHeight: 200)
+//                } else {
+//                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)], spacing: 20) {
+//                        ForEach(results) { result in
+//                            ResultCardView(result: result)
+//                        }
+//                    }
+//                }
+//            }
+//            .padding(30)
+//        }
+//    }
+//    
+//    // Helper function to return the correct data based on the selected tab.
+//    private func currentResults() -> [TestResult] {
+//        switch selectedTab {
+//        case .recent:
+//            return viewModel.recentResults
+//        case .best:
+//            return viewModel.bestResults
+//        case .all:
+//            return viewModel.allResults
+//        }
+//    }
+//}
+//
+//// MARK: - ResultTabButton
+//// A dedicated view for the custom tab buttons.
+//struct ResultTabButton: View {
+//    let tab: ResultTab
+//    @Binding var selectedTab: ResultTab
+//    
+//    var body: some View {
+//        Button(action: {
+//            withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
+//                selectedTab = tab
+//            }
+//        }) {
+//            Text(tab.rawValue)
+//                .font(.headline)
+//                .fontWeight(.semibold)
+//                .padding(.vertical, 12)
+//                .frame(maxWidth: .infinity)
+//                .background(
+//                    ZStack {
+//                        if selectedTab == tab {
+//                            RoundedRectangle(cornerRadius: 8)
+//                                .fill(tab.activeColor)
+//                                .shadow(radius: 3, y: 2)
+//                        }
+//                    }
+//                )
+//                .foregroundColor(selectedTab == tab ? .white : .primary)
+//        }
+//        .buttonStyle(PlainButtonStyle())
+//    }
+//}
+//
+//// Enum to define the filter tabs for the results.
+//enum ResultTab: String, CaseIterable, Identifiable {
+//    case recent = "Recent"
+//    case best = "Best Scores"
+//    case all = "All Results"
+//    var id: String { self.rawValue }
+//    
+//    var activeColor: Color {
+//        switch self {
+//        case .recent: return .quizifyPrimary
+//        case .best: return .quizifyAccentBlue
+//        case .all: return .quizifyAccentGreen
+//        }
+//    }
+//}
+//
+//// MARK: - ResultCardView
+//// A card for displaying the details of a single test result.
+//struct ResultCardView: View {
+//    let result: TestResult
+//    
+//    // Determines the color based on the score for visual feedback.
+//    private var scoreColor: Color {
+//        if result.score >= 90 { return .quizifyAccentGreen }
+//        if result.score >= 80 { return .quizifyAccentBlue }
+//        if result.score >= 70 { return .quizifyAccentYellow }
+//        return .quizifyRedError
+//    }
+//
+//    var body: some View {
+//        HStack(alignment: .center, spacing: 25) {
+//            // MARK: Score Section
+//            VStack(spacing: 5) {
+//                ZStack {
+//                    Circle()
+//                        .stroke(lineWidth: 10.0)
+//                        .opacity(0.1)
+//                        .foregroundColor(scoreColor)
+//                    
+//                    Circle()
+//                        .trim(from: 0.0, to: CGFloat(result.score) / 100.0)
+//                        .stroke(style: StrokeStyle(lineWidth: 10.0, lineCap: .round, lineJoin: .round))
+//                        .foregroundColor(scoreColor)
+//                        .rotationEffect(Angle(degrees: 270.0))
+//                        .animation(.linear(duration: 1.0), value: result.score)
+//
+//                    Text("\(result.score)%")
+//                        .font(.system(size: 32, weight: .bold))
+//                        .foregroundColor(scoreColor)
+//                }
+//                .frame(width: 100, height: 100)
+//                
+//                Text("Your Score")
+//                    .font(.caption)
+//                    .fontWeight(.semibold)
+//                    .foregroundColor(.quizifyTextGray)
+//                    .padding(.top, 10)
+//            }
+//            .frame(width: 120) // Fixed width for consistent layout
+//            
+//            Divider()
+//                .frame(maxHeight: .infinity) // Extends the divider to fill the available vertical space
+//
+//            // MARK: Metrics and Footer Section
+//            VStack(alignment: .leading, spacing: 20) {
+//                // Main Test Title and Subject
+//                VStack(alignment: .leading, spacing: 5) {
+//                    Text(result.title)
+//                        .font(.title2)
+//                        .fontWeight(.bold)
+//                    Text(result.subject)
+//                        .font(.headline)
+//                        .foregroundColor(.gray)
+//                }
+//                .frame(maxWidth: .infinity, alignment: .leading)
+//                
+//                Divider()
+//
+//                // Key Metrics - A new, clean grid layout with a cross divider.
+//                HStack {
+//                    ZStack {
+//                        Rectangle().fill(Color.gray.opacity(0.15)).frame(width: 1)
+//                        Rectangle().fill(Color.gray.opacity(0.15)).frame(height: 1)
+//
+//                        VStack(spacing: 15) {
+//                            HStack(spacing: 20) {
+//                                ResultSummaryItem(icon: "checkmark.circle.fill", label: "Correct Answers", value: "\(result.correct) / \(result.total)")
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                ResultSummaryItem(icon: "person.2.fill", label: "Class Average", value: "\(result.classAverage)%")
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                            }
+//                            HStack(spacing: 20) {
+//                                ResultSummaryItem(icon: "hourglass", label: "Duration", value: result.duration)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                                ResultSummaryItem(icon: "calendar", label: "Date", value: result.date)
+//                                    .frame(maxWidth: .infinity, alignment: .leading)
+//                            }
+//                        }
+//                    }
+//                }
+//                .padding()
+//                .background(Color.gray.opacity(0.05))
+//                .cornerRadius(12)
+//                
+//                // Footer with Teacher Info and Action Button
+//                HStack {
+//                    // Teacher Info
+//                    HStack(spacing: 10) {
+//                        AsyncImage(url: URL(string: result.teacherAvatar ?? "")) { image in
+//                            image.resizable().clipShape(Circle())
+//                        } placeholder: {
+//                            Image(systemName: "person.crop.circle.fill").resizable()
+//                        }
+//                        .frame(width: 30, height: 30)
+//                        
+//                        Text(result.teacher)
+//                            .font(.headline)
+//                            .foregroundColor(.quizifyTextGray)
+//                    }
+//                    
+//                    Spacer()
+//                    
+//                    // Action Button styled to match the app's theme.
+//                    Button(action: {}) {
+//                        Label("View Details", systemImage: "eye.fill")
+//                            .fontWeight(.semibold)
+//                            .padding(.vertical, 10)
+//                            .frame(minWidth: 150)
+//                    }
+//                    .buttonStyle(OutlineButtonStyle(color: .quizifyPrimary))
+//                }
+//            }
+//        }
+//        .padding(25)
+//        .background(Color.white)
+//        .cornerRadius(20)
+//        .shadow(color: .black.opacity(0.05), radius: 10, x: 0, y: 5)
+//    }
+//}
+//
+//// A reusable sub-view to display a key metric within the card.
+//fileprivate struct ResultSummaryItem: View {
+//    let icon: String
+//    let label: String
+//    let value: String
+//    
+//    var body: some View {
+//        HStack(alignment: .center) { // Changed to center alignment
+//            Image(systemName: icon)
+//                .foregroundColor(.quizifyPrimary)
+//                .frame(width: 20)
+//            VStack(alignment: .leading, spacing: 2) {
+//                Text(label)
+//                    .font(.caption)
+//                    .foregroundColor(.quizifyTextGray)
+//                Text(value)
+//                    .font(.headline)
+//                    .fontWeight(.medium)
+//            }
+//        }
+//    }
+//}
+//
+//// MARK: - Preview
+//struct ResultsView_Previews: PreviewProvider {
+//    static var previews: some View {
+//        ResultsView()
+//            .frame(width: 1400)
+//            .background(Color.quizifyOffWhite)
+//    }
+//}
+
+
+
+
+
 import SwiftUI
 
 // The ResultsView shows a detailed breakdown of the user's test scores.
@@ -1790,7 +3430,7 @@ struct ResultsView: View {
                         .font(.title3)
                         .foregroundColor(.quizifyTextGray)
                 }
-
+                
                 // MARK: - Performance Summary Metrics
                 // A new grid of five dynamically populated stat cards for a more balanced layout.
                 LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 25), count: 5), spacing: 25) {
@@ -1850,17 +3490,17 @@ struct ResultsView: View {
                     .frame(maxWidth: 600)
                     Spacer()
                 }
-
+                
                 // MARK: - Results List
-                // The list of result cards, filtered by the selected tab.
-                VStack(spacing: 20) {
-                    let results = currentResults()
-                    if results.isEmpty {
-                        Text("No results to display in this category.")
-                            .foregroundColor(.gray)
-                            .font(.headline)
-                            .frame(maxWidth: .infinity, minHeight: 200)
-                    } else {
+                // The list of result cards, now arranged in a two-column grid for better visual appeal on larger screens.
+                let results = currentResults()
+                if results.isEmpty {
+                    Text("No results to display in this category.")
+                        .foregroundColor(.gray)
+                        .font(.headline)
+                        .frame(maxWidth: .infinity, minHeight: 200)
+                } else {
+                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 20), GridItem(.flexible(), spacing: 20)], spacing: 20) {
                         ForEach(results) { result in
                             ResultCardView(result: result)
                         }
@@ -1870,7 +3510,7 @@ struct ResultsView: View {
             .padding(30)
         }
     }
-
+    
     // Helper function to return the correct data based on the selected tab.
     private func currentResults() -> [TestResult] {
         switch selectedTab {
@@ -1889,7 +3529,7 @@ struct ResultsView: View {
 struct ResultTabButton: View {
     let tab: ResultTab
     @Binding var selectedTab: ResultTab
-
+    
     var body: some View {
         Button(action: {
             withAnimation(.spring(response: 0.3, dampingFraction: 0.7)) {
@@ -1922,7 +3562,7 @@ enum ResultTab: String, CaseIterable, Identifiable {
     case best = "Best Scores"
     case all = "All Results"
     var id: String { self.rawValue }
-
+    
     var activeColor: Color {
         switch self {
         case .recent: return .quizifyPrimary
@@ -1936,7 +3576,7 @@ enum ResultTab: String, CaseIterable, Identifiable {
 // A card for displaying the details of a single test result.
 struct ResultCardView: View {
     let result: TestResult
-
+    
     // Determines the color based on the score for visual feedback.
     private var scoreColor: Color {
         if result.score >= 90 { return .quizifyAccentGreen }
@@ -1946,16 +3586,15 @@ struct ResultCardView: View {
     }
 
     var body: some View {
-        HStack(alignment: .top, spacing: 25) {
+        HStack(alignment: .center, spacing: 25) {
             // MARK: Score Section
-            // This section is now a fixed-width container to prevent stretching.
             VStack(spacing: 5) {
                 ZStack {
                     Circle()
                         .stroke(lineWidth: 10.0)
                         .opacity(0.1)
                         .foregroundColor(scoreColor)
-
+                    
                     Circle()
                         .trim(from: 0.0, to: CGFloat(result.score) / 100.0)
                         .stroke(style: StrokeStyle(lineWidth: 10.0, lineCap: .round, lineJoin: .round))
@@ -1968,17 +3607,17 @@ struct ResultCardView: View {
                         .foregroundColor(scoreColor)
                 }
                 .frame(width: 100, height: 100)
-
+                
                 Text("Your Score")
                     .font(.caption)
                     .fontWeight(.semibold)
                     .foregroundColor(.quizifyTextGray)
+                    .padding(.top, 10)
             }
             .frame(width: 120) // Fixed width for consistent layout
-
-            // A vertical divider to visually separate the score from the metrics.
+            
             Divider()
-                .frame(height: 120)
+                .frame(maxHeight: .infinity) // Extends the divider to fill the available vertical space
 
             // MARK: Metrics and Footer Section
             VStack(alignment: .leading, spacing: 20) {
@@ -1992,11 +3631,10 @@ struct ResultCardView: View {
                         .foregroundColor(.gray)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-
+                
                 Divider()
 
-                // Key Metrics
-                // This section uses a cross-divider layout similar to the TestsView for a clean, organized look.
+                // Key Metrics - A new, clean grid layout with a cross divider.
                 HStack {
                     ZStack {
                         Rectangle().fill(Color.gray.opacity(0.15)).frame(width: 1)
@@ -2021,7 +3659,7 @@ struct ResultCardView: View {
                 .padding()
                 .background(Color.gray.opacity(0.05))
                 .cornerRadius(12)
-
+                
                 // Footer with Teacher Info and Action Button
                 HStack {
                     // Teacher Info
@@ -2032,14 +3670,14 @@ struct ResultCardView: View {
                             Image(systemName: "person.crop.circle.fill").resizable()
                         }
                         .frame(width: 30, height: 30)
-
+                        
                         Text(result.teacher)
                             .font(.headline)
                             .foregroundColor(.quizifyTextGray)
                     }
-
+                    
                     Spacer()
-
+                    
                     // Action Button styled to match the app's theme.
                     Button(action: {}) {
                         Label("View Details", systemImage: "eye.fill")
@@ -2063,12 +3701,13 @@ fileprivate struct ResultSummaryItem: View {
     let icon: String
     let label: String
     let value: String
-
+    
     var body: some View {
-        HStack {
+        HStack(alignment: .top) {
             Image(systemName: icon)
                 .foregroundColor(.quizifyPrimary)
                 .frame(width: 20)
+                .padding(.top, 2)
             VStack(alignment: .leading, spacing: 2) {
                 Text(label)
                     .font(.caption)
