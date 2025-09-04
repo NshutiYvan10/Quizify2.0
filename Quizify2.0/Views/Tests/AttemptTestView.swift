@@ -12289,3 +12289,956 @@ struct ConfettiParticle {
         rotation += .degrees(.random(in: -10...10))
     }
 }
+
+
+
+
+
+
+
+
+//import SwiftUI
+//
+//// The main view for a student to take a test, presented as a full-screen cover.
+//struct AttemptTestView: View {
+//    @StateObject private var viewModel: AttemptTestViewModel
+//    @State private var showExitConfirmation = false
+//    @State private var flaggedQuestions: Set<Int> = []
+//    let onFinish: () -> Void
+//
+//    init(testId: Int, onFinish: @escaping () -> Void) {
+//        _viewModel = StateObject(wrappedValue: AttemptTestViewModel(testId: testId))
+//        self.onFinish = onFinish
+//    }
+//
+//    var body: some View {
+//        ZStack {
+//            LinearGradient(colors: [Color(hex: "#F0F2F5"), .white], startPoint: .top, endPoint: .bottom)
+//                .edgesIgnoringSafeArea(.all)
+//
+//            if viewModel.isSubmitted {
+//                TestResultsSummaryView(viewModel: viewModel, onDismiss: onFinish)
+//                    .transition(.scale.combined(with: .opacity))
+//            } else if let test = viewModel.testDetails {
+//                TestTakingView(
+//                    test: test,
+//                    viewModel: viewModel,
+//                    flaggedQuestions: $flaggedQuestions,
+//                    onExit: { showExitConfirmation = true }
+//                )
+//            } else {
+//                ProgressView("Loading Test...")
+//            }
+//
+//            // Confirmation dialogs
+//            if showExitConfirmation {
+//                Color.black.opacity(0.5).edgesIgnoringSafeArea(.all)
+//                ExitTestConfirmationView(
+//                    onConfirmExit: { onFinish() },
+//                    onCancel: { showExitConfirmation = false }
+//                )
+//                .transition(.move(edge: .bottom).combined(with: .opacity))
+//            }
+//
+//            if viewModel.isSubmitAlertShowing {
+//                Color.black.opacity(0.5).edgesIgnoringSafeArea(.all)
+//                SubmitTestConfirmationView(
+//                    answeredCount: viewModel.answeredCount,
+//                    totalQuestions: viewModel.totalQuestions,
+//                    flaggedCount: flaggedQuestions.count,
+//                    onConfirm: { viewModel.submitTest() },
+//                    onCancel: { viewModel.isSubmitAlertShowing = false }
+//                )
+//                .transition(.move(edge: .bottom).combined(with: .opacity))
+//            }
+//        }
+//        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: showExitConfirmation)
+//        .animation(.spring(response: 0.4, dampingFraction: 0.8), value: viewModel.isSubmitAlertShowing)
+//        .animation(.default, value: viewModel.isSubmitted)
+//    }
+//}
+//
+//// MARK: - Main Test-Taking Layout
+//struct TestTakingView: View {
+//    let test: TestDetails
+//    @ObservedObject var viewModel: AttemptTestViewModel
+//    @Binding var flaggedQuestions: Set<Int>
+//    let onExit: () -> Void
+//
+//    var body: some View {
+//        VStack(spacing: 0) {
+//            TestInfoHeader(test: test, onExit: onExit)
+//
+//            HStack(alignment: .top, spacing: 30) {
+//                VStack(alignment: .center, spacing: 0) {
+//                    QuestionProgressHeader(
+//                        current: viewModel.currentQuestionIndex + 1,
+//                        total: viewModel.totalQuestions
+//                    )
+//                    .padding(.bottom, 20)
+//
+//                    ZStack {
+//                        let question = test.questions[viewModel.currentQuestionIndex]
+//                        QuestionCardView(
+//                            question: question,
+//                            selectedAnswer: viewModel.answers[viewModel.currentQuestionIndex],
+//                            isFlagged: flaggedQuestions.contains(viewModel.currentQuestionIndex),
+//                            onSelectAnswer: { viewModel.selectAnswer($0) },
+//                            onToggleFlag: {
+//                                if flaggedQuestions.contains(viewModel.currentQuestionIndex) {
+//                                    flaggedQuestions.remove(viewModel.currentQuestionIndex)
+//                                } else {
+//                                    flaggedQuestions.insert(viewModel.currentQuestionIndex)
+//                                }
+//                            }
+//                        )
+//                        .id(viewModel.currentQuestionIndex)
+//                        .transition(.asymmetric(
+//                            insertion: .move(edge: .trailing).combined(with: .opacity),
+//                            removal: .move(edge: .leading).combined(with: .opacity)
+//                        ))
+//                    }
+//                    .clipped()
+//                    .padding(.bottom, 25)
+//
+//                    QuestionNavigationView(
+//                        totalQuestions: test.questions.count,
+//                        currentQuestionIndex: $viewModel.currentQuestionIndex,
+//                        answers: viewModel.answers,
+//                        flaggedQuestions: flaggedQuestions
+//                    )
+//                    .padding(.bottom, 25)
+//
+//                    TestNavigationButtons(viewModel: viewModel)
+//                        .padding(.bottom, 25)
+//
+//                    ImprovedScratchpadView()
+//
+//                    Spacer()
+//                }
+//                .frame(maxWidth: .infinity, alignment: .top)
+//
+//                VStack(spacing: 30) {
+//                    TimerCardView(timeLeft: viewModel.timeLeft, totalTime: test.duration * 60)
+//                    QuestionStatusSummaryCard(viewModel: viewModel, flaggedQuestions: flaggedQuestions)
+//                }
+//                .frame(width: 380, alignment: .top)
+//            }
+//            .padding(30)
+//        }
+//    }
+//}
+//
+//// MARK: - ViewModel Extensions
+//extension AttemptTestViewModel {
+//    var totalQuestions: Int { testDetails?.questions.count ?? 0 }
+//    var unansweredCount: Int { totalQuestions - answeredCount }
+//}
+//
+//// MARK: - Redesigned Subviews
+//struct TestInfoHeader: View {
+//    let test: TestDetails
+//    let onExit: () -> Void
+//
+//    var body: some View {
+//        HStack {
+//            VStack(alignment: .leading) {
+//                Text(test.title).font(.system(size: 28, weight: .bold))
+//                Text(test.subject).font(.title2).foregroundColor(.gray)
+//            }
+//            Spacer()
+//            Button(action: onExit) {
+//                Label("Exit Test", systemImage: "xmark.circle.fill")
+//                    .font(.headline)
+//                    .padding()
+//            }
+//            .buttonStyle(OutlineButtonStyle(color: .quizifyRedError))
+//        }
+//        .padding(.horizontal, 30)
+//        .padding(.vertical, 20)
+//        .background(Color.white.shadow(.drop(color: .black.opacity(0.05), radius: 5, y: 5)))
+//    }
+//}
+//
+//struct QuestionProgressHeader: View {
+//    let current: Int
+//    let total: Int
+//
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 8) {
+//            Text("Question \(current) of \(total)")
+//                .font(.headline)
+//                .foregroundColor(.quizifyTextGray)
+//
+//            ProgressView(value: Double(current), total: Double(total))
+//                .progressViewStyle(LinearProgressViewStyle(tint: .quizifyPrimary))
+//                .scaleEffect(x: 1, y: 1.5, anchor: .center)
+//                .cornerRadius(4)
+//        }
+//    }
+//}
+//
+//struct TimerCardView: View {
+//    let timeLeft: Int
+//    let totalTime: Int
+//
+//    private func formatTime(_ seconds: Int) -> String {
+//        let mins = seconds / 60
+//        let secs = seconds % 60
+//        return "\(String(format: "%02d", mins)):\(String(format: "%02d", secs))"
+//    }
+//
+//    private var progress: Double { totalTime == 0 ? 0 : Double(timeLeft) / Double(totalTime) }
+//    private var ringColor: Color {
+//        switch progress {
+//        case 0.3...: return .quizifyAccentGreen
+//        case 0.1..<0.3: return .orange
+//        default: return .quizifyRedError
+//        }
+//    }
+//
+//    var body: some View {
+//        VStack(spacing: 20) {
+//            Label("Time Remaining", systemImage: "alarm.fill")
+//                .font(.title3.weight(.semibold))
+//                .foregroundColor(.quizifyTextGray)
+//
+//            ZStack {
+//                Circle()
+//                    .stroke(lineWidth: 15.0)
+//                    .opacity(0.1)
+//                    .foregroundColor(.quizifyPrimary)
+//
+//                Circle()
+//                    .trim(from: 0.0, to: CGFloat(progress))
+//                    .stroke(style: StrokeStyle(lineWidth: 15.0, lineCap: .round, lineJoin: .round))
+//                    .foregroundColor(ringColor)
+//                    .rotationEffect(Angle(degrees: 270.0))
+//                    .animation(.linear(duration: 1.0), value: timeLeft)
+//
+//                Text(formatTime(timeLeft))
+//                    .font(.system(size: 48, weight: .bold, design: .monospaced))
+//                    .foregroundColor(ringColor)
+//            }
+//            .frame(width: 200, height: 200)
+//        }
+//        .frame(maxWidth: .infinity)
+//        .padding(30)
+//        .background(Color.white)
+//        .cornerRadius(20)
+//        .shadow(color: .black.opacity(0.05), radius: 10, y: 5)
+//    }
+//}
+//
+//struct QuestionStatusSummaryCard: View {
+//    @ObservedObject var viewModel: AttemptTestViewModel
+//    let flaggedQuestions: Set<Int>
+//
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 15) {
+//            Text("Answer Summary").font(.title2).bold()
+//            HStack(spacing: 12) {
+//                SummaryChip(text: "✅ Answered \(viewModel.answeredCount)", color: .quizifyAccentGreen)
+//                SummaryChip(text: "❌ Unanswered \(viewModel.unansweredCount)", color: .quizifyRedError)
+//                SummaryChip(text: "🚩 Flagged \(flaggedQuestions.count)", color: .yellow)
+//            }
+//            Divider()
+//            VStack(spacing: 12) {
+//                ForEach(0..<viewModel.totalQuestions, id: \.self) { index in
+//                    HStack {
+//                        HStack(spacing: 8) {
+//                            Text("Question \(index + 1)").fontWeight(.medium)
+//                            if flaggedQuestions.contains(index) { Image(systemName: "star.fill").foregroundColor(.yellow) }
+//                        }
+//                        Spacer()
+//                        if let ans = viewModel.answers[index] {
+//                            Label("Answered", systemImage: "checkmark.circle.fill").foregroundColor(.quizifyAccentGreen)
+//                        } else if index < viewModel.currentQuestionIndex {
+//                            Label("Not Answered", systemImage: "xmark.circle.fill").foregroundColor(.quizifyRedError)
+//                        } else {
+//                            Label("Not Yet Reached", systemImage: "circle.dotted").foregroundColor(.quizifyTextGray)
+//                        }
+//                    }
+//                    .font(.headline)
+//                }
+//            }
+//        }
+//        .padding(30).background(Color.white).cornerRadius(20).shadow(color: .black.opacity(0.05), radius: 10, y: 5)
+//    }
+//}
+//
+//private struct SummaryChip: View {
+//    let text: String
+//    let color: Color
+//    var body: some View {
+//        Text(text)
+//            .font(.footnote.weight(.semibold))
+//            .padding(.horizontal, 10)
+//            .padding(.vertical, 6)
+//            .background(color.opacity(0.15))
+//            .foregroundColor(color)
+//            .cornerRadius(10)
+//    }
+//}
+//
+//struct QuestionCardView: View {
+//    let question: Question
+//    let selectedAnswer: String?
+//    let isFlagged: Bool
+//    let onSelectAnswer: (String) -> Void
+//    let onToggleFlag: () -> Void
+//
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 20) {
+//            HStack {
+//                Text(question.question).font(.system(size: 24, weight: .semibold))
+//                Spacer()
+//                Button(action: onToggleFlag) {
+//                    Image(systemName: isFlagged ? "flag.fill" : "flag")
+//                        .foregroundColor(isFlagged ? .yellow : .gray)
+//                        .font(.title2)
+//                }
+//                .buttonStyle(PlainButtonStyle())
+//            }
+//
+//            if let imageUrl = question.image, let url = URL(string: imageUrl) {
+//                AsyncImage(url: url) { $0.resizable().aspectRatio(contentMode: .fit) } placeholder: { ProgressView() }
+//                    .frame(maxHeight: 250).cornerRadius(16)
+//            }
+//
+//            ForEach(question.options, id: \.self) { option in
+//                AnswerOptionRow(option: option, isSelected: option == selectedAnswer, onSelect: { onSelectAnswer(option) })
+//            }
+//        }
+//        .padding(30).background(Color.white).cornerRadius(20).shadow(color: .black.opacity(0.05), radius: 10, y: 5)
+//    }
+//}
+//
+//// MARK: - Redesigned Question Navigation Grid (with flagged indicator)
+//struct QuestionNavigationView: View {
+//    let totalQuestions: Int
+//    @Binding var currentQuestionIndex: Int
+//    let answers: [String?]
+//    let flaggedQuestions: Set<Int>
+//
+//    var body: some View {
+//        HStack(spacing: 12) {
+//            ForEach(0..<totalQuestions, id: \.self) { index in
+//                Button(action: { withAnimation(.spring()) { currentQuestionIndex = index } }) {
+//                    ZStack(alignment: .topTrailing) {
+//                        Circle()
+//                            .fill(buttonFill(for: index))
+//                            .shadow(
+//                                color: currentQuestionIndex == index ? .quizifyPrimary.opacity(0.7) : .clear,
+//                                radius: 8
+//                            )
+//
+//                        Circle()
+//                            .stroke(buttonStroke(for: index), lineWidth: 2)
+//
+//                        Text("\(index + 1)")
+//                            .font(.headline)
+//                            .fontWeight(.bold)
+//                            .foregroundColor(buttonForeground(for: index))
+//
+//                        if flaggedQuestions.contains(index) {
+//                            Image(systemName: "star.fill")
+//                                .font(.system(size: 12))
+//                                .foregroundColor(.yellow)
+//                                .offset(x: 8, y: -8)
+//                        }
+//                    }
+//                    .frame(width: 50, height: 50)
+//                }
+//                .buttonStyle(PlainButtonStyle())
+//            }
+//        }
+//        .frame(maxWidth: .infinity)
+//    }
+//
+//    private func buttonFill(for index: Int) -> Color {
+//        if currentQuestionIndex == index { return .quizifyPrimary }
+//        else if answers[index] != nil { return .white } // keep filled only for current
+//        else { return .white }
+//    }
+//
+//    private func buttonStroke(for index: Int) -> Color {
+//        if currentQuestionIndex == index { return .quizifyPrimary.opacity(0.5) }
+//        else if answers[index] != nil { return .quizifyAccentGreen }
+//        else { return .quizifyLightGray }
+//    }
+//
+//    private func buttonForeground(for index: Int) -> Color {
+//        if currentQuestionIndex == index { return .white }
+//        else if answers[index] != nil { return .quizifyAccentGreen }
+//        else { return .quizifyTextGray }
+//    }
+//}
+//
+//struct TestNavigationButtons: View {
+//    @ObservedObject var viewModel: AttemptTestViewModel
+//
+//    var body: some View {
+//        HStack {
+//            Button(action: {
+//                withAnimation { viewModel.previousQuestion() }
+//            }) {
+//                Label("Previous", systemImage: "arrow.left.circle.fill")
+//                    .font(.headline)
+//                    .padding()
+//            }
+//            .buttonStyle(OutlineButtonStyle(color: .quizifyTextGray))
+//            .disabled(viewModel.currentQuestionIndex == 0)
+//            .opacity(viewModel.currentQuestionIndex == 0 ? 0.5 : 1.0)
+//
+//            Spacer()
+//
+//            if viewModel.currentQuestionIndex == viewModel.totalQuestions - 1 {
+//                Button(action: { viewModel.isSubmitAlertShowing = true }) {
+//                    Label("Submit Test", systemImage: "checkmark.circle.fill")
+//                        .font(.headline)
+//                        .fontWeight(.bold)
+//                        .padding()
+//                }
+//                .buttonStyle(FilledButtonStyle(color: .quizifyAccentGreen))
+//            } else {
+//                Button(action: {
+//                    withAnimation { viewModel.nextQuestion() }
+//                }) {
+//                    Label("Next", systemImage: "arrow.right.circle.fill")
+//                        .font(.headline)
+//                        .fontWeight(.bold)
+//                        .padding()
+//                }
+//                .buttonStyle(FilledButtonStyle(color: .quizifyPrimary))
+//            }
+//        }
+//    }
+//}
+//
+//// MARK: - Improved Scratchpad
+//struct ImprovedScratchpadView: View {
+//    @State private var notes = ""
+//    @State private var selectedFontName: String = "Helvetica"
+//    @State private var selectedFontSize: CGFloat = 16
+//    @State private var selectedColor: Color = .black
+//    @State private var isBold = false
+//    @State private var isUnderline = false
+//    @State private var isCollapsed = false
+//    @State private var darkMode = false
+//
+//    let fonts = ["Helvetica", "Arial", "Times New Roman", "Courier", "Menlo"]
+//    let fontSizes: [CGFloat] = [12, 14, 16, 18, 22, 26]
+//    let colors: [Color] = [.black, .red, .blue, .green, .orange, .purple]
+//
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 10) {
+//            HStack(alignment: .firstTextBaseline) {
+//                VStack(alignment: .leading, spacing: 4) {
+//                    Text("Scratchpad ✏️").font(.headline)
+//                    Text("Use this space for rough notes. Your input here won’t be saved — it’s just to help you while answering.")
+//                        .font(.footnote)
+//                        .foregroundColor(.secondary)
+//                }
+//                Spacer()
+//                Button(action: { withAnimation { isCollapsed.toggle() } }) {
+//                    Label(isCollapsed ? "Show" : "Hide", systemImage: isCollapsed ? "chevron.down" : "chevron.up")
+//                }
+//            }
+//
+//            if !isCollapsed {
+//                // Toolbar (enhanced)
+//                HStack(spacing: 12) {
+//                    Picker("", selection: $selectedFontName) {
+//                        ForEach(fonts, id: \.self) { fontName in
+//                            Text(fontName).font(.custom(fontName, size: 14))
+//                        }
+//                    }
+//                    .pickerStyle(.menu)
+//                    .frame(width: 140)
+//
+//                    Picker("", selection: $selectedFontSize) {
+//                        ForEach(fontSizes, id: \.self) { size in
+//                            Text("\(Int(size)) pt").tag(size)
+//                        }
+//                    }
+//                    .pickerStyle(.menu)
+//                    .frame(width: 80)
+//
+//                    HStack(spacing: 8) {
+//                        ForEach(colors, id: \.self) { color in
+//                            Button(action: { selectedColor = color }) {
+//                                Circle()
+//                                    .fill(color)
+//                                    .frame(width: 22, height: 22)
+//                                    .overlay(
+//                                        Circle()
+//                                            .stroke(selectedColor == color ? Color.blue.opacity(0.8) : Color.clear, lineWidth: 2)
+//                                    )
+//                            }
+//                            .buttonStyle(PlainButtonStyle())
+//                        }
+//                    }
+//
+//                    Spacer()
+//
+//                    Toggle("Blackboard", isOn: $darkMode).toggleStyle(SwitchToggleStyle())
+//
+//                    HStack(spacing: 10) {
+//                        Button(action: { isBold.toggle() }) {
+//                            Image(systemName: "bold")
+//                                .font(.headline)
+//                                .padding(8)
+//                                .background(isBold ? Color.quizifyPrimary.opacity(0.2) : Color.clear)
+//                                .cornerRadius(5)
+//                        }
+//                        .buttonStyle(PlainButtonStyle())
+//
+//                        Button(action: { isUnderline.toggle() }) {
+//                            Image(systemName: "underline")
+//                                .font(.headline)
+//                                .padding(8)
+//                                .background(isUnderline ? Color.quizifyPrimary.opacity(0.2) : Color.clear)
+//                                .cornerRadius(5)
+//                        }
+//                        .buttonStyle(PlainButtonStyle())
+//
+//                        Button(action: { notes = "" }) {
+//                            Label("Clear", systemImage: "trash")
+//                        }
+//                    }
+//                }
+//                .padding(10)
+//                .background(Color.gray.opacity(0.08))
+//
+//                Divider()
+//
+//                ZStack(alignment: .topLeading) {
+//                    TextEditor(text: $notes)
+//                        .padding(10)
+//                        .font(.custom(selectedFontName, size: selectedFontSize))
+//                        .foregroundColor(selectedColor)
+//                        .bold(isBold)
+//                        .underline(isUnderline)
+//                        .frame(height: 250, alignment: .top)
+//                        .scrollContentBackground(.hidden)
+//                        .background(darkMode ? Color.black.opacity(0.9) : Color(hex: "#FFFFE0"))
+//                        .cornerRadius(12)
+//                        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color.gray.opacity(0.2)))
+//
+//                    if notes.isEmpty {
+//                        Text("Type your notes here…")
+//                            .foregroundColor(.secondary)
+//                            .padding(.top, 16)
+//                            .padding(.leading, 16)
+//                    }
+//                }
+//            }
+//        }
+//        .padding(12)
+//        .background(Color.white)
+//        .cornerRadius(12)
+//        .shadow(color: .black.opacity(0.05), radius: 5)
+//    }
+//}
+//
+//// MARK: - Confirmation and Result Views
+//struct ExitTestConfirmationView: View {
+//    let onConfirmExit: () -> Void
+//    let onCancel: () -> Void
+//
+//    var body: some View {
+//        VStack(spacing: 25) {
+//            Image(systemName: "exclamationmark.triangle.fill")
+//                .font(.system(size: 50))
+//                .foregroundColor(.orange)
+//                .padding(20)
+//                .background(Circle().fill(Color.orange.opacity(0.1)))
+//
+//            VStack(spacing: 8) {
+//                Text("Leave Test?")
+//                    .font(.system(size: 32, weight: .bold))
+//                    .foregroundColor(.white)
+//                Text("If you leave now, the test will be marked as missed. This action cannot be undone.")
+//                    .font(.title3)
+//                    .foregroundColor(.white.opacity(0.8))
+//                    .multilineTextAlignment(.center)
+//            }
+//
+//            HStack(spacing: 20) {
+//                Button(action: onCancel) {
+//                    Text("Stay")
+//                        .fontWeight(.semibold)
+//                        .frame(maxWidth: .infinity)
+//                        .padding()
+//                }
+//                .buttonStyle(OutlineButtonStyle(color: .white))
+//
+//                Button(action: onConfirmExit) {
+//                    Label("Leave Test", systemImage: "door.left.hand.open")
+//                        .fontWeight(.bold)
+//                        .frame(maxWidth: .infinity)
+//                        .padding()
+//                }
+//                .buttonStyle(FilledButtonStyle(color: .quizifyRedError))
+//            }
+//            .padding(.top, 10)
+//        }
+//        .padding(40)
+//        .background(
+//            ZStack {
+//                Color.black.opacity(0.45)
+//                LinearGradient(
+//                    gradient: Gradient(colors: [
+//                        Color.quizifyRedError.opacity(0.5),
+//                        Color.quizifyDarkBackground.opacity(0.7)
+//                    ]),
+//                    startPoint: .topLeading,
+//                    endPoint: .bottomTrailing
+//                )
+//                RoundedRectangle(cornerRadius: 25)
+//                    .stroke(LinearGradient(gradient: Gradient(colors: [Color.white.opacity(0.4), Color.white.opacity(0.1)]), startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
+//            }
+//        )
+//        .cornerRadius(25)
+//        .shadow(color: .black.opacity(0.3), radius: 30, x: 0, y: 15)
+//        .padding(50)
+//        .frame(maxWidth: 600)
+//    }
+//}
+//
+//struct SubmitTestConfirmationView: View {
+//    let answeredCount: Int
+//    let totalQuestions: Int
+//    let flaggedCount: Int // NEW
+//    let onConfirm: () -> Void
+//    let onCancel: () -> Void
+//
+//    var body: some View {
+//        VStack(spacing: 25) {
+//            Image(systemName: "checkmark.seal.fill")
+//                .font(.system(size: 50))
+//                .foregroundColor(.quizifyAccentGreen)
+//                .padding(20)
+//                .background(Circle().fill(Color.quizifyAccentGreen.opacity(0.1)))
+//
+//            VStack(spacing: 10) {
+//                Text("Submit Test?")
+//                    .font(.system(size: 32, weight: .bold))
+//                    .foregroundColor(.white)
+//
+//                // Dynamic warning text including flagged
+//                Group {
+//                    if flaggedCount > 0 {
+//                        Text("You have answered \(answeredCount) of \(totalQuestions) questions. 🚩 You still have \(flaggedCount) flagged question(s).")
+//                    } else if answeredCount < totalQuestions {
+//                        Text("You have answered \(answeredCount) of \(totalQuestions) questions.")
+//                    } else {
+//                        Text("You have answered all \(totalQuestions) questions.")
+//                    }
+//                }
+//                .font(.title3)
+//                .foregroundColor(.white.opacity(0.9))
+//                .multilineTextAlignment(.center)
+//            }
+//
+//            HStack(spacing: 20) {
+//                Button(action: onCancel) {
+//                    Text("Cancel")
+//                        .fontWeight(.semibold)
+//                        .frame(maxWidth: .infinity)
+//                        .padding()
+//                }
+//                .buttonStyle(OutlineButtonStyle(color: .white))
+//
+//                Button(action: onConfirm) {
+//                    Label("Submit", systemImage: "paperplane.fill")
+//                        .fontWeight(.bold)
+//                        .frame(maxWidth: .infinity)
+//                        .padding()
+//                }
+//                .buttonStyle(FilledButtonStyle(color: .quizifyAccentGreen))
+//            }
+//            .padding(.top, 10)
+//        }
+//        .padding(40)
+//        .background(
+//            ZStack {
+//                Color.black.opacity(0.45)
+//                LinearGradient(
+//                    gradient: Gradient(colors: [
+//                        Color.quizifyAccentGreen.opacity(0.5),
+//                        Color.quizifyDarkBackground.opacity(0.7)
+//                    ]),
+//                    startPoint: .topLeading,
+//                    endPoint: .bottomTrailing
+//                )
+//                RoundedRectangle(cornerRadius: 25)
+//                    .stroke(LinearGradient(gradient: Gradient(colors: [Color.white.opacity(0.4), Color.white.opacity(0.1)]), startPoint: .top, endPoint: .bottom), lineWidth: 1.5)
+//            }
+//        )
+//        .cornerRadius(25)
+//        .shadow(color: .black.opacity(0.3), radius: 30, x: 0, y: 15)
+//        .padding(50)
+//        .frame(maxWidth: 600)
+//    }
+//}
+//
+//// MARK: - Redesigned TestResultsSummaryView (unchanged except for existing visuals)
+//struct TestResultsSummaryView: View {
+//    @ObservedObject var viewModel: AttemptTestViewModel
+//    let onDismiss: () -> Void
+//
+//    var body: some View {
+//        ZStack {
+//            Color.quizifyOffWhite.edgesIgnoringSafeArea(.all)
+//
+//            ScrollView {
+//                VStack(spacing: 30) {
+//                    if let result = viewModel.testResult {
+//                        ScoreSummaryCard(result: result)
+//                            .padding(.top, 40)
+//
+//                        Text("Question Breakdown")
+//                            .font(.title2)
+//                            .fontWeight(.bold)
+//                            .frame(maxWidth: .infinity, alignment: .leading)
+//                            .padding(.horizontal, 30)
+//
+//                        if let questions = viewModel.testDetails?.questions {
+//                            ForEach(questions.indices, id: \.self) { index in
+//                                QuestionResultCard(
+//                                    question: questions[index],
+//                                    userAnswer: viewModel.answers[index],
+//                                    questionNumber: index + 1
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
+//                .padding(.bottom, 120)
+//            }
+//
+//            // MARK: - Footer Buttons
+//            VStack {
+//                Spacer()
+//                HStack {
+//                    Spacer()
+//                    VStack(spacing: 20) {
+//                        HStack(spacing: 20) {
+//                            Button(action: onDismiss) {
+//                                Label("Back to Tests", systemImage: "arrow.left.circle.fill")
+//                                    .fontWeight(.semibold)
+//                                    .frame(maxWidth: .infinity)
+//                                    .padding()
+//                            }
+//                            .buttonStyle(OutlineButtonStyle(color: .quizifyPrimary))
+//
+//                            Button(action: {}) {
+//                                Label("Download Results", systemImage: "square.and.arrow.down.fill")
+//                                    .fontWeight(.semibold)
+//                                    .frame(maxWidth: .infinity)
+//                                    .padding()
+//                            }
+//                            .buttonStyle(FilledButtonStyle(color: .quizifyAccentGreen))
+//                        }
+//                    }
+//                    .padding(30)
+//                    .background(Color.white)
+//                    .cornerRadius(20)
+//                    .shadow(color: .black.opacity(0.1), radius: 10)
+//                    .frame(maxWidth: 600)
+//                    Spacer()
+//                }
+//                .padding(.bottom)
+//            }
+//            .edgesIgnoringSafeArea(.bottom)
+//
+//            if let result = viewModel.testResult, result.score >= 80 {
+//                ConfettiView()
+//                    .allowsHitTesting(false)
+//            }
+//        }
+//    }
+//}
+//
+//// MARK: - Helper Views for Results Summary
+//struct ScoreSummaryCard: View {
+//    let result: (score: Int, correct: Int, total: Int)
+//
+//    var body: some View {
+//        VStack(spacing: 15) {
+//            Text("Test Completed!")
+//                .font(.system(size: 40, weight: .bold))
+//
+//            ZStack {
+//                Circle()
+//                    .stroke(lineWidth: 20)
+//                    .foregroundColor(Color.gray.opacity(0.1))
+//
+//                Circle()
+//                    .trim(from: 0, to: CGFloat(result.score) / 100)
+//                    .stroke(style: StrokeStyle(lineWidth: 20, lineCap: .round, lineJoin: .round))
+//                    .fill(result.score >= 70 ? Color.quizifyAccentGreen : Color.quizifyRedError)
+//                    .rotationEffect(.degrees(-90))
+//
+//                Text("\(result.score)%")
+//                    .font(.system(size: 72, weight: .bold))
+//            }
+//            .frame(width: 250, height: 250)
+//            .shadow(color: (result.score >= 70 ? Color.quizifyAccentGreen : Color.quizifyRedError).opacity(0.5), radius: 20)
+//
+//            Text("You answered \(result.correct) out of \(result.total) questions correctly.")
+//                .font(.title)
+//                .foregroundColor(.quizifyTextGray)
+//        }
+//        .padding(40)
+//        .background(Color.white)
+//        .cornerRadius(25)
+//        .shadow(color: .black.opacity(0.1), radius: 10)
+//        .padding(.horizontal, 30)
+//    }
+//}
+//
+//struct QuestionResultCard: View {
+//    let question: Question
+//    let userAnswer: String?
+//    let questionNumber: Int
+//
+//    var body: some View {
+//        VStack(alignment: .leading, spacing: 15) {
+//            Text("Question \(questionNumber): \(question.question)")
+//                .font(.title2)
+//                .fontWeight(.bold)
+//
+//            ForEach(question.options, id: \.self) { option in
+//                HStack {
+//                    if option == question.correctAnswer {
+//                        Image(systemName: "checkmark.circle.fill")
+//                            .foregroundColor(.quizifyAccentGreen)
+//                    } else if option == userAnswer {
+//                        Image(systemName: "xmark.circle.fill")
+//                            .foregroundColor(.quizifyRedError)
+//                    } else {
+//                        Image(systemName: "circle")
+//                            .foregroundColor(.gray.opacity(0.5))
+//                    }
+//                    Text(option)
+//                }
+//                .font(.headline)
+//                .padding(12)
+//                .frame(maxWidth: .infinity, alignment: .leading)
+//                .background(
+//                    (option == question.correctAnswer ? Color.quizifyAccentGreen : (option == userAnswer ? Color.quizifyRedError : Color.clear))
+//                        .opacity(0.1)
+//                )
+//                .cornerRadius(10)
+//            }
+//        }
+//        .padding(20)
+//        .background(Color.white)
+//        .cornerRadius(16)
+//        .shadow(color: .black.opacity(0.05), radius: 5)
+//        .padding(.horizontal, 30)
+//    }
+//}
+//
+//struct AnswerOptionRow: View {
+//    let option: String
+//    let isSelected: Bool
+//    let onSelect: () -> Void
+//
+//    var body: some View {
+//        Button(action: onSelect) {
+//            HStack {
+//                Image(systemName: isSelected ? "largecircle.fill.circle" : "circle")
+//                    .font(.title2)
+//                    .foregroundColor(isSelected ? .quizifyPrimary : .gray)
+//                Text(option)
+//                    .font(.title3)
+//                Spacer()
+//            }
+//            .padding()
+//            .background(isSelected ? Color.quizifyPrimary.opacity(0.1) : Color.clear)
+//            .cornerRadius(12)
+//            .overlay(RoundedRectangle(cornerRadius: 12).stroke(isSelected ? Color.quizifyPrimary : .gray.opacity(0.3), lineWidth: 2))
+//        }
+//        .buttonStyle(PlainButtonStyle())
+//    }
+//}
+//
+//// MARK: - Animated Confetti View
+//struct ConfettiView: View {
+//    @State private var particles: [ConfettiParticle] = []
+//    @State private var burstCount = 0
+//    private let totalBursts = 3
+//    private let burstDuration: TimeInterval = 5
+//
+//    var body: some View {
+//        GeometryReader { geometry in
+//            TimelineView(.animation) { timeline in
+//                Canvas { context, size in
+//                    for particle in particles {
+//                        var newContext = context
+//                        newContext.opacity = particle.opacity
+//                        newContext.translateBy(x: particle.position.x, y: particle.position.y)
+//                        newContext.rotate(by: particle.rotation)
+//                        newContext.fill(Path(CGRect(x: -particle.size.width / 2, y: -particle.size.height / 2, width: particle.size.width, height: particle.size.height)), with: .color(particle.color))
+//                    }
+//                }
+//                .onChange(of: timeline.date) {
+//                    if particles.isEmpty && burstCount < totalBursts {
+//                        particles = createParticles(size: geometry.size)
+//                        burstCount += 1
+//                    }
+//                    updateParticles(at: timeline.date)
+//                }
+//            }
+//        }
+//    }
+//
+//    private func createParticles(size: CGSize) -> [ConfettiParticle] {
+//        (0..<150).map { _ in ConfettiParticle(size: size, duration: burstDuration) }
+//    }
+//
+//    private func updateParticles(at date: Date) {
+//        for i in particles.indices {
+//            particles[i].update()
+//        }
+//        particles.removeAll { $0.isFinished }
+//    }
+//}
+//
+//struct ConfettiParticle {
+//    var position: CGPoint
+//    var color: Color
+//    var size: CGSize
+//    var rotation: Angle
+//    var velocity: CGVector
+//    var creationDate = Date()
+//    var duration: TimeInterval
+//
+//    var isFinished: Bool {
+//        Date().timeIntervalSince(creationDate) > duration
+//    }
+//    var opacity: Double {
+//        max(0, 1 - (Date().timeIntervalSince(creationDate) / duration))
+//    }
+//
+//    init(size viewSize: CGSize, duration: TimeInterval) {
+//        self.position = CGPoint(x: .random(in: 0...viewSize.width), y: -20)
+//        self.color = [.red, .green, .blue, .yellow, .purple, .orange].randomElement()!
+//        self.size = CGSize(width: .random(in: 8...15), height: .random(in: 5...10))
+//        self.rotation = .degrees(.random(in: 0...360))
+//        self.velocity = CGVector(dx: .random(in: -50...50), dy: .random(in: 100...250))
+//        self.duration = duration
+//    }
+//
+//    mutating func update() {
+//        let timeInterval = 1.0 / 60.0 // Assume 60 FPS
+//        position.x += velocity.dx * timeInterval
+//        position.y += velocity.dy * timeInterval
+//        rotation += .degrees(.random(in: -10...10))
+//    }
+//}
+
